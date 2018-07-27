@@ -1,11 +1,15 @@
-"""Stitcher preferences module."""
+"""Stitcher preferences module
+
+Defines Settings base class, and factory to dynamically create all
+required Settings subclasses.
+"""
 
 from setting_definitions import SETTING_DEFINITIONS
 
 
 class PropertyDescriptor:
     """Simple property descriptor w/ validation against allowed values."""
-    def __init__(self, name, allowed_values=None, default=None): #, instance):
+    def __init__(self, name, allowed_values=None, default=None):
         self.name = name
         self.allowed_values = allowed_values
         self.default = default
@@ -50,57 +54,9 @@ class PropertyDescriptor:
                     self.name, self.allowed_values, value))
 
 
-# TODO(ryan): DEPRECATED with new setting factory
-# TODO(ryan): Add appropriate inheritance
-class BlendSettings:
-    """Blend Setting."""
-    tag = 'blend'
-    
-    # _properties = []
-    prop_def = SETTING_DEFINITIONS[tag]['useOpticalFlow']
-    useOpticalFlow = PropertyDescriptor(prop_def.allowed, prop_def.default)
-    # useOpticalFlow = PropertyDescriptor('useOpticalFlow')
-    # useNewOpticalFlow = PropertyDescriptor('useNewOpticalFlow')
-    # mode = PropertyDescriptor('mode')
-    # samplingLevel = PropertyDescriptor('samplingLevel')
-    # useTopFixer= PropertyDescriptor('useTopFixer')
-
-    # TODO(ryan): automatically build this...w/ defaults
-    _properties = ['useOpticalFlow', 'useNewOpticalFlow', 'mode',
-                   'samplingLevel', 'useTopFixer']
-
-    def __init__(self,
-                 useOpticalFlow=True,
-                 useNewOpticalFlow=True,
-                 mode='pano',
-                 samplingLevel='fast',
-                 useTopFixer=False):
-        self.useOpticalFlow = useOpticalFlow
-        self.useNewOpticalFlow = useNewOpticalFlow
-        self.mode = mode
-        self.samplingLevel = samplingLevel
-        self.useTopFixer = useTopFixer
-
-
-    def __repr__(self):
-        property_list = ['{0}={1!r}'.format(key, getattr(self, key, None))
-                         for key in self._properties]
-        nested_settings = ['{0}={1!r}'.format(key, getattr(self, key, None))
-                           for key in self._nested]
-        repr_str = '{0}({1}{2})\n'.format(self.tag, ', '.join(property_list),
-                                     ', '.join(nested_settings)) 
-        return repr_str
-        # return '{0}({1})'.format(self.tag, ', '.join(property_list)) 
-
-
 
 class Setting:
     """Base class for settings."""
-    # def __repr__(self):
-    #     property_list = ['{0}={1!r}'.format(key, getattr(self, key, None))
-    #                      for key in self._properties]
-    #     return '{0}({1})'.format(self.tag, ', '.join(property_list)) 
-
     def __repr__(self):
         property_list = ['{0}={1!r}'.format(key, getattr(self, key, None))
                          for key in self._properties]
@@ -119,53 +75,6 @@ class Setting:
         return self.__dict__
 
 
-# def setting_factory_backup(setting_name, properties):
-#     try:
-#         properties = properties.replace(',', ' ').split()
-#     except AttributeError:  # no .replace or .split
-#         pass  # Assume properties is already a sequence
-#     props = tuple(properties)
-# 
-#     def __init__(self, *args, **kwargs):
-#         # Start with default values in a dict and update with args/kwargs
-#         attrs = {}
-#         for prop in self._properties:
-#             prop_descr = getattr(self.__class__, prop)
-#             attrs[prop] = prop_descr.default
-#         
-#         # print(attrs)
-#          # print(args)
-#         # print(kwargs)
-#         arg_attrs = dict(zip(self._properties, args))
-#         # print(arg_attrs)
-#         arg_attrs.update(kwargs)
-#         # print(arg_attrs)
-#         attrs.update(arg_attrs)
-#         # print(attrs)
-# 
-#         # Set the attributes through the PropertyDescriptor
-#         for name, value in attrs.items():
-#             # print(name, value)
-#             setattr(self, name, value)
-#             # Set defaults if not supplied
-#             
-# 
-#     prop_descriptors = {}
-#     for prop in properties:
-#         print(prop)
-#         prop_def = SETTING_DEFINITIONS[setting_name][prop]
-#         prop_descriptors[prop] = PropertyDescriptor(prop,
-#                                     prop_def.allowed, prop_def.default)
-# 
-#     cls_attrs = dict(__init__ = __init__,
-#                      tag = setting_name,
-#                      _properties = props)
-#     cls_attrs.update(prop_descriptors)
-# 
-#     return type(setting_name, (Setting,), cls_attrs)
-# 
-
-
 def setting_factory(setting_name, properties):
     """Automatically create a new setting object.
 
@@ -174,12 +83,6 @@ def setting_factory(setting_name, properties):
         properties: dict of PropertyDefs
     """
     print('Building setting: {0}'.format(setting_name))
-    # try:
-    #     properties = properties.replace(',', ' ').split()
-    # except AttributeError:  # no .replace or .split
-    #     pass  # Assume properties is already a sequence
-    # props = tuple(properties.keys())
-
     def __init__(self, *args, **kwargs):
         # Start with default values in a dict and update with args/kwargs
         attrs = {}
@@ -188,47 +91,31 @@ def setting_factory(setting_name, properties):
             if isinstance(prop_descr, PropertyDescriptor):
                 attrs[prop] = prop_descr.default
         
-        # print(attrs)
-         # print(args)
-        # print(kwargs)
         arg_attrs = dict(zip(self._properties, args))
-        # print(arg_attrs)
         arg_attrs.update(kwargs)
-        # print(arg_attrs)
         attrs.update(arg_attrs)
-        # print(attrs)
 
         # Set the attributes through the PropertyDescriptor
         for name, value in attrs.items():
-            # print(name, value)
             setattr(self, name, value)
-            # Set defaults if not supplied
-            
 
     prop_descriptors = {}
     nested = {}
     for prop, prop_def in properties.items():
-        # TODO(ryan): This currently handles a single level of nesting
         print(prop, type(prop_def))
         if isinstance(prop_def, dict):
             print("NESTED!!")
             print(properties[prop])
             # Nested properties have another Settings object as their value
             # They are not PropertyDescriptors
-            # Create our setting class and instantiate an instance 
+            # We create a new Settings class, and will create an instance later
             nested[prop] = setting_factory(prop, properties[prop])
         
-            # new_setting = setting_factory(prop, properties[prop])
-            # prop_descriptors[prop] = new_setting() 
-
-        # prop_def = SETTING_DEFINITIONS[setting_name][prop]
         else:
             prop_descriptors[prop] = PropertyDescriptor(prop,
                                                         prop_def.allowed,
                                                         prop_def.default)
 
-    # props = tuple(prop_descriptors.keys())
-    # nested = tuple(nested.keys())
     cls_attrs = dict(__init__ = __init__,
                      tag = setting_name,
                      _properties = tuple(prop_descriptors.keys()),
@@ -239,67 +126,13 @@ def setting_factory(setting_name, properties):
     return type(setting_name, (Setting,), cls_attrs)
 
 
-def build_config_template():
-    """Return a configuration template for stitching settings."""
-    # Naively create a dict object with values as record objects
-    config_template = {}
-    for setting in SETTING_DEFINITIONS.keys():
-        print(setting)
-        props = [p for p in SETTING_DEFINITIONS[setting]]
-        print(props)    
-        config_template[setting] = setting_factory(setting, props)
-
-    return config_template
-
-
 def build_config_template_new():
     """Return a configuration template for stitching settings."""
     # Naively create a dict object with values as record objects
-    # We need to build from bottom up...
-    config_template = {}
     config_template = setting_factory('settings', SETTING_DEFINITIONS)
-    # for key, value in SETTING_DEFINITIONS.items():
-    #     print(key)
-    #     config_template[key] = setting_factory(key, value)
-    # print(config_template)
 
     return config_template
         
-        # Search props to see if we have nesting
-        # for key, value in SETTING_DEFINITIONS[setting].items():
-        #     if isinstance(value, dict):
-        #         print("NESTED")
-        #         print(key)
-        #         # props = [p for p in SETTING_DEFINITIONS[setting][key]]
-        #         new_setting = setting_factory(key, value)
-        #         print(new_setting)
-        #         # for k, v in SETTING_DEFINITIONS[setting][prop].items():
-        #         #     print(k, v)            
-                    
- 
-        # props = [p for p in SETTING_DEFINITIONS[setting]]
-        # print(props)    
-        # config_template[setting] = setting_factory(setting, props)
- 
-    # config = {}
-    # for s in config_template:
-    #     config[s] = config_template[s]()
-
-    # return config
-
-
-# def initialize_template(config_template):
-#     """Create a new instance from a Settings config template w/ defaults."""
-#     # Recursiveley initialize from top->down
-#     temp = config_template()    
-#     for n in temp._nested:
-#         print(n)
-#         new_setting = getattr(temp, n)
-#         initialized_setting = _initialize_setting(new_setting)
-#         setattr(temp, n, initialized_setting)
-# 
-#     return temp
-# 
 
 def initialize_settings(setting_template):
     """Create a new instance from a Settings config template w/ defaults."""
@@ -355,13 +188,6 @@ if __name__ == '__main__':
 
     # Let's start iterating through..
     # print(PROPERTY_DEFINITIONS)
-
-    # Naively create a dict object with values as record objects
-    # config_template = build_config_template()
-    # config_template = {}
-    # for setting in SETTING_DEFINITIONS.keys():
-    #     props = [p for p in PROPERTY_DEFINITIONS[setting]]
-    #     config_template[setting] = setting_factory(setting, props)
 
     template = build_config_template_new()
     temp = initialize_settings(template)

@@ -10,6 +10,9 @@ import shutil
 from absl import app
 from absl import flags
 
+from flugelhorn.yaml_utils import load_configuration_from_yaml
+
+
 flags.DEFINE_string(
     'source', None,
     'Source path to recursively search for image and video files for stitching.'
@@ -29,7 +32,7 @@ flags.DEFINE_string(
 
 FLAGS = flags.FLAGS
 
-def check_paths(paths):
+def _check_paths(paths):
     """Check that all supplied paths are directories."""
     for p in paths:
         if not os.path.isdir(p):
@@ -54,111 +57,32 @@ def find_video_image_dirs(path):
     
 
 def copy_source_to_raw_dirs(source_dirs, dest_base):
+    dest_paths = []
     for d in source_dirs:
         dest_path = os.path.join(dest_base, d[1])
         print('Copying {0} to {1}.'.format(d[0], dest_path))
         shutil.copytree(d[0], dest_path) 
+        dest_paths.append(dest_path)
         
-    # TODO(ryan): return list of new raw dir paths
+    return dest_paths
 
 
-def build_stitching_settings(base_settings, raw_dirs, stitched_dir):
-    """Build stitching settings."""
+def find_video_image_dirs(path):
+    """Scan a directory and return lists of video and image dirs for processing."""
+    source_video_dirs = []
+    source_image_dirs = []
+    for entry in os.scandir(path):
+        if entry.is_dir():
+            # todo(ryan): divide by video and images
+            # print(entry.path)
+            # print(entry.name)
+            source_video_dirs.append((entry.path, entry.name)) 
+    
+    print('{0} video directories, {1} images directories found.'.format(
+        len(source_video_dirs), len(source_image_dirs)))
 
-    # Assume VIDEO for now 
-    # TODO(ryan):
-    # fileCount should be defined by looking at directories
-    base_settings = {
-        'input': {
-            'type': 'video',
-            'lensCount': 6,
-            'fileCount': 1
-        }, 
-        'blend': {
-            'useOpticalFlow': True,
-            'useNewOpticalFlow': True,
-            'mode': '?????',
-            'samplingLevel': 'fast',
-            'useTopFixer': False
-        },
-        'blend_calibration': {
-            'lensVersion': 7,
-            'lensType': 12,
-            'captureTime': '?????',
-            'captureTimeIndex': '?????',
-            'useDefaultCircle': True,
-            'useDefaultOffset': True
-        },
-        # Check local hardware setting
-        'encode': {
-            'useHardware': True,
-            'threads': 1,
-            'preset': 'superfast',
-            'profile': 'baseline'
-        },
-        'decode': {
-            'useHardware': True,
-            'threads': 1,
-            'count': 1
-        },
-        'blender': {
-            'type': 'auto'
-        },
-        'gyro': {
-            'version': 3, # Version from pro.prj file
-            'type': 'pro', 
-            'enable': True,
-            'filter': 'akf'
-        },
-        # Add timeOffset tag, based on start_ts from pro.pj XML file
-        # Add files tag, w/ path to desired gyro.dat file in our image folder
-        'gyro_calibration': {
-            # These values fcome from pro.pj XML file
-            'gravity_x': 0.0008186848958333335,
-            'gravity_y': -0.00043326822916666665,
-            'gravity_z': 0.9980732421875
-        },
-        'gyro_angle': {
-            'diff_pan': 0,
-            'diff_tilt': 0,
-            'diff_roll': 0,
-            'distance': 603.3333333333334
-        },
-        'color': {
-            'brightness': 0,
-            'contrast':0,
-            'highlight': 0,
-            'shadow': 0,
-            'saturation': 0,
-            'tempture': 0,
-            'tint': 0,
-            'sharpness': 0 
-        },
-        'depthMap': {
-            'enable': False,
-            'path': '',
-            'inverse': True
-        },
-        'output': {
-            'width': 3840,
-            'height':1920,
-            'dst': '~/stitchertest/test.mp4',
-            'type': 'video'
-        },
-        'video': {
-            'fps': 29.97,
-            'codec': 'h264',
-            # TODO(ryan): This should be calculated?
-            'bitrate': 62914560,
-            'useInterpolation': False
-        },
-    'audio': {
-        'type': 'pano',
-        'device': 'insta360'
-    }
-}
-
-
+    return source_video_dirs, source_image_dirs
+ 
 
 def main(argv):
     if not FLAGS.source:
@@ -176,7 +100,7 @@ def main(argv):
     
     # Check that all paths are directories
     try:
-        check_paths([source_dir, raw_dir, stitched_dir])
+        _check_paths([source_dir, raw_dir, stitched_dir])
     except NotADirectoryError as e:
         print(e) 
 
@@ -184,18 +108,22 @@ def main(argv):
     source_video_dirs, source_image_dirs = find_video_image_dirs(source_dir)
 
     print('Copying video directories.')
-    copy_source_to_raw_dirs(source_video_dirs, raw_dir) 
+    # raw_video_paths = copy_source_to_raw_dirs(source_video_dirs, raw_dir) 
 
-    print('Copying image directories.')
-    copy_source_to_raw_dirs(source_image_dirs, raw_dir) 
+    # print('Copying image directories.')
+    # raw_image_dirs = copy_source_to_raw_dirs(source_image_dirs, raw_dir) 
 
     print('Copying complete')
 
+    # Find source files
+    
+
+
     print('------Beginning Stitching-------')
+    build_stitching_sources(raw_video_paths)
     build_stitching_settings(source_video_dirs, stitched_dir)
 
 
 
 if __name__ == '__main__':
-    # Find source files given a starting directory
     app.run(main) 

@@ -29,14 +29,6 @@ SETTING_DEFINITIONS= {
             'useDefaultOffset': PropertyDef([True, False], True)
         },
     },
-    'blend_calibration': {
-        'lensVersion': PropertyDef(None, 7),
-        'lensType': PropertyDef(None, 12),
-        'captureTime': PropertyDef(None, None),
-        'captureTimeIndex': PropertyDef(None, None),
-        'useDefaultCircle': PropertyDef([True, False], True),
-        'useDefaultOffset': PropertyDef([True, False], True)
-    },
     'preference': {
         'encode': {
             'useHardware': PropertyDef([True, False], False),
@@ -58,7 +50,9 @@ SETTING_DEFINITIONS= {
         'version': PropertyDef([1, 2, 3], 2),
         'type': PropertyDef(['pro'], 'pro'),
         'enable': PropertyDef([True, False], True),
-        'filter': PropertyDef(['akf'], 'akf')
+        'filter': PropertyDef(['akf'], 'akf'),
+        'timeOffset': PropertyDef(None, None),
+        'filename': PropertyDef(None, None)
     },
     'gyro_calibration': {
         'gravity_x': PropertyDef(None, None),
@@ -66,10 +60,10 @@ SETTING_DEFINITIONS= {
         'gravity_z': PropertyDef(None, None)
     },
     'gyro_angle': {
-        'diff_pan': PropertyDef(None, None),
-        'diff_tilt': PropertyDef(None, None),
-        'diff_roll': PropertyDef(None, None),
-        'distance': PropertyDef(None, None)
+        'diff_pan': PropertyDef(None, 0),
+        'diff_tilt': PropertyDef(None, 0),
+        'diff_roll': PropertyDef(None, 0),
+        'distance': PropertyDef(None, 603.3333333333334)
     },
     'color': {
         'brightness': PropertyDef(None, None),

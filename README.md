@@ -20,7 +20,10 @@ conda env create -f environment.yml
 pip install .
 ```
 
-
+## Run from the Command Line
+```
+$ copy-and-stitch --source=/Volumes/SD-Video2 --raw=/Users/me/Projects/NewFilm/raw --stitched=/Users/me/Projects/NewFilm/stitched --
+```
 
 ## Settings Documentation
 ### input

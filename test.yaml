@@ -5,7 +5,7 @@ input:
 blend: 
   useOpticalFlow: true
   useNewOpticalFlow: true
-  mode: cuda
+  mode: pano 
   samplingLevel: fast
   useTopFixer: false
   calibration:

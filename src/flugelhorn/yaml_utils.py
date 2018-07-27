@@ -1,15 +1,16 @@
-"""YAML settings parsing module."""
+"""YAML configuration load & parsing module."""
 
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-
 from ruamel.yaml import YAML
 
 from stitcher_preferences import build_config_template_new, initialize_settings
 
-def load_yaml_to_dict(path):
+
+def _load_yaml_to_dict(path):
+    """Read a YAML file into a py dict."""
     with open(path, 'r') as f:
         yaml = YAML(typ='safe')
         data = yaml.load(f)    
@@ -17,7 +18,7 @@ def load_yaml_to_dict(path):
     return data
 
 
-def parse_yaml_dict(settings_dict):
+def _parse_yaml_dict(settings_dict):
     """Create a stitcher Settings configuration object.
     
     Applies settings as defined in a settings dictionary,
@@ -29,25 +30,16 @@ def parse_yaml_dict(settings_dict):
 
     print(settings_dict)
 
-    # Replace defaults w/ our settings
+    # Recursively replace defaults w/ our settings
     # This also validates our settings
-    for key, value in settings_dict.items():
-        print(key, isinstance(value, dict)) 
-        # Recurse
-        _config_from_dict(getattr(config, key, None), value)
+    _config_from_dict(config, settings_dict)
 
-        # for key in value:
-        #     print('\t', prop)
-        #     setattr(config, prop, value)
-
-    print(config)        
     return config 
 
+
 def _config_from_dict(config, settings_dict):
-    print("RECURSE")
     print(config)
     for key, value in settings_dict.items():
-        print(key, isinstance(value, dict)) 
         if isinstance(value, dict):
             _config_from_dict(getattr(config, key, None), value) 
         else:
@@ -56,12 +48,20 @@ def _config_from_dict(config, settings_dict):
     print(config) 
 
 
+def load_configuration_from_yaml(yaml_path):
+    yaml_dict = _load_yaml_to_dict(yaml_path)
+    config = _parse_yaml_dict(yaml_dict)
+
+    return config     
+
+
+
 if __name__ == '__main__':
     test_path = '/Users/ryan/Projects/VrVideoAutomations/test.yaml' 
+    config = load_configuration_from_yaml(test_path)
 
-    test = load_yaml_to_dict(test_path)
-    settings = parse_yaml_dict(test)
-    # parse_dict_to_object(test)
+    # test = load_yaml_to_dict(test_path)
+    # settings = parse_yaml_dict(test)
 
 
 

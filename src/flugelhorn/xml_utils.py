@@ -21,12 +21,12 @@ def convert_to_xml(obj, tag_name=None):
     # And to converts these nested objects to XML subelements via recursion.
     # For simplicity, this is not currently supported, but may make sense
     # to support in the future 
-    # attribs = {}
-    # for key, value in obj.to_dict().items():
-    #     if typ
 
-    # This works for single level objects, but not nested
-    attribs = {key: _convert_to_str(value) for key, value in obj.to_dict().items()}
+    attribs = {}
+    for key, value in obj.to_dict().items():
+        if type(value) in [int, float, str, bool]:
+            attribs[key] = _convert_to_str(value) 
+    # attribs = {key: _convert_to_str(value) for key, value in obj.to_dict().items()}
     if not tag_name:
         tag_name = obj.tag
     elem = ET.Element(tag_name, attribs)
@@ -47,28 +47,23 @@ def _convert_to_str(value):
         return value
 
 
-def build_config_xml(video_file_paths, config):
+def build_config_xml(config, stitch_source):
     """Build a configuration XML from a validated config dict."""
     # Build root element and tree
     root = ET.Element('stitchParam')
     tree = ET.ElementTree(root)
 
-    # # Add inputs
-    # input_attrib = {
-    #     'type': 'video',
-    #     'lensCount': '6',
-    #     'fileCount': '1'}
-
-    inputs = convert_to_xml(config['input'])
+    inputs = convert_to_xml(config.input)
 
     # root.append(convert_to_xml(config['input'])) 
     
     # inputs = ET.SubElement(root, 'input', config['input'].to_dict())
 
-    #TODO(ryan): supports single video group only for now
-    video_group = build_video_group(video_file_paths)
+    video_groups = build_video_groups(stitch_source)
 
-    inputs.append(video_group)    
+    for vid_grp in video_groups:
+        ET.dump(vid_grp)
+        inputs.append(vid_grp)
     root.append(inputs)
 
     blend = build_blend_settings(config)
@@ -83,8 +78,8 @@ def build_config_xml(video_file_paths, config):
     root.append(gyro)
 
     # Add color, depthMap and output
-    root.append(convert_to_xml(config['color']))
-    root.append(convert_to_xml(config['depthMap']))
+    root.append(convert_to_xml(config.color))
+    root.append(convert_to_xml(config.depthMap))
     root.append(build_output(config))    
     
 
@@ -93,8 +88,8 @@ def build_config_xml(video_file_paths, config):
 
 def build_blend_settings(config):
     """Build a blend setting XML element."""
-    blend = convert_to_xml(config['blend'])
-    blend.append(convert_to_xml(config['blend_calibration'], 'calibration'))
+    blend = convert_to_xml(config.blend)
+    blend.append(convert_to_xml(config.blend.calibration, 'calibration'))
 
     return blend
 
@@ -103,53 +98,98 @@ def build_preference(config):
     """Build a preference XML element."""
     pref = ET.Element('preference', {})
 
-    pref.append(convert_to_xml(config['encode']))
-    pref.append(convert_to_xml(config['decode']))
-    pref.append(convert_to_xml(config['blender']))
+    pref.append(convert_to_xml(config.preference.encode))
+    pref.append(convert_to_xml(config.preference.decode))
+    pref.append(convert_to_xml(config.preference.blender))
      
     return pref 
 
 
 def build_gyro(config):
     """Build a gyro XML element."""
-    gyro = convert_to_xml(config['gyro'])
-    # TODO(ryan): Add Gyro files and timeOffset
+    # Root gyro element
+    gyro_attribs = {'version': _convert_to_str(config.gyro.version),
+                    'type': _convert_to_str(config.gyro.type),
+                    'enable': _convert_to_str(config.gyro.enable),
+                    'filter': _convert_to_str(config.gyro.filter)}
+    gyro = ET.Element('gyro', gyro_attribs)
 
-    gyro.append(convert_to_xml(config['gyro_calibration'], 'calibration'))
-    gyro.append(convert_to_xml(config['gyro_angle'], 'angle'))
+    # Add timeOffset
+    time_offset = ET.Element('timeOffset')
+    time_offset.text = config.gyro.timeOffset
+    gyro.append(time_offset) 
+
+    # Add files
+    files = ET.Element('files')
+    f = ET.Element('file')
+    f.text = config.gyro.filename
+    files.append(f)
+    gyro.append(files)
+
+    # Calibration and angle elements
+    gyro.append(convert_to_xml(config.gyro_calibration, 'calibration'))
+    gyro.append(convert_to_xml(config.gyro_angle, 'angle'))
 
     return gyro
 
 
 def build_output(config):
     """Build an output XML element."""
-    output = convert_to_xml(config['output'])
-    output.append(convert_to_xml(config['video']))
-    output.append(convert_to_xml(config['audio']))
+    output = convert_to_xml(config.output)
+    output.append(convert_to_xml(config.video))
+    output.append(convert_to_xml(config.audio))
 
     return output
 
 
-def build_video_group(video_file_paths):
-    """Build a video group XML element from a list of video files.
+def build_video_groups(stitch_source):
+    """Build a list of video group XML element from a stitch source.
     Args:
-        video_file_paths: list of video_file paths
+        stitch_source: StitchSource object
     """
-    video_group_attrib = {
-        'ptsOffset': '0',
-        'enable': '1'}
-    video_group = ET.Element('videoGroup', video_group_attrib)
+    video_groups = []
+    for group in stitch_source.media:
+        print(group)
+        video_group_attrib = {
+            'ptsOffset': '%0.3f' % group['ptsOffset'],
+            'enable': '1'}
+        video_group = ET.Element('videoGroup', video_group_attrib)
 
-    # Add trim data
-    ET.SubElement(video_group, 'trim', {'start': '0', 'end': '5'})
+        # Add trim data
+        ET.SubElement(video_group, 'trim', {'start': '%0.3f' % group['start'],
+                                            'end': '%0.3f' % group['end']})
    
-    # Add file data
-    for path in video_file_paths:
-        ET.SubElement(video_group, 'file', {'src': path}) 
+        # Add file data
+        for n in range(6):
+            ET.SubElement(video_group, 'file', {'src': group[n]}) 
 
-    return video_group
+        video_groups.append(video_group)
+
+    return video_groups
 
 
+def parse_proj_xml(path):
+    """Parse a proj xml file and return a dict."""
+    proj_dict = {}
+    raw_xml = ET.parse(path)
+
+    # Add file groups (to be later used as videoGroups
+    filegroups = []
+    for x in raw_xml.getiterator('filegroup'):
+        files = [f.text for f in x]
+        filegroups.append(files)
+    proj_dict['file_groups'] = filegroups
+
+
+    # Add gyro calibration
+    proj_dict['gyro_version'] = raw_xml.find('gyro').attrib['version']
+    proj_dict['gravity_x'] = raw_xml.find('./gyro/calibration/gravity_x').text
+    proj_dict['gravity_y'] = raw_xml.find('./gyro/calibration/gravity_y').text
+    proj_dict['gravity_z'] = raw_xml.find('./gyro/calibration/gravity_z').text
+    proj_dict['timeOffset'] = raw_xml.find('./gyro/start_ts').text    
+ 
+
+    return proj_dict
 
 
 if __name__ == '__main__':
@@ -249,11 +289,14 @@ if __name__ == '__main__':
             }
     }
 
-    config = create_stitcher_config(all_settings)
+    test_proj = '/Users/ryan/Projects/test_videos/new_source/VID_2018_07_13_00_04_31/pro.prj'
+    proj_dict = parse_proj_xml(test_proj)
+
+    # config = create_stitcher_config(all_settings)
 
     # inputs = ET.SubElement(root, 'input', config['input'].to_dict())
     # test = convert_to_xml(config['input'])
-    test = build_config_xml(test_vid_paths, config)
+    # test = build_config_xml(test_vid_paths, config)
 
     # blend_attrib = {
     #     'useOpticalFlow': '1',
