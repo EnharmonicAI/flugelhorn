@@ -1,0 +1,56 @@
+input:
+  type: video 
+  lensCount: 6
+  fileCount: 1
+blend: 
+  useOpticalFlow: true
+  useNewOpticalFlow: true
+  mode: cuda
+  samplingLevel: fast
+  useTopFixer: false
+  calibration:
+    lensVersion: 7
+    lensType: 12
+    useDefaultCircle: true
+    useDefaultOffset: true
+preference:
+  encode: 
+    useHardware: true
+    threads: 1
+    preset: superfast
+    profile: baseline
+  decode:
+    useHardware: true
+    threads: 1
+    count: 1
+  blender:
+    type: auto
+gyro:
+  version: 3 # Version from pro.prj file
+  type: pro 
+  enable: true
+  filter: akf
+# Add timeOffset tag, based on start_ts from pro.pj XML file
+# Add files tag, w/ path to desired gyro.dat file in our image folder
+color:
+  brightness: 0
+  contrast: 0
+  highlight: 0
+  shadow: 0
+  saturation: 0
+  tempture: 0
+  tint: 0
+  sharpness: 0 
+output:
+  width: 7680 
+  height: 3840 
+  type: video
+video:
+  fps: 29.97
+  codec: h264
+  # TODO(ryan): This should be calculated?
+  useInterpolation: false
+audio:
+  type: pano
+  device: insta360
+       
