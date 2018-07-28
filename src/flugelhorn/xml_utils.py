@@ -192,6 +192,14 @@ def parse_proj_xml(path):
     return proj_dict
 
 
+def write_config_xml(config, stitch_source, save_path):
+    """Build and write a config xml file to disk.
+
+    """
+    config_xml = build_config_xml(config, stitch_source)
+    config_xml.write(save_path)
+
+
 if __name__ == '__main__':
 
     test_vid_paths = [

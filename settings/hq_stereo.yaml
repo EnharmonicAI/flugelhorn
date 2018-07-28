@@ -5,8 +5,8 @@ input:
 blend: 
   useOpticalFlow: true
   useNewOpticalFlow: true
-  mode: pano 
-  samplingLevel: fast
+  mode: stereo_top_left 
+  samplingLevel: slow
   useTopFixer: false
   calibration:
     lensVersion: 7
@@ -15,23 +15,21 @@ blend:
     useDefaultOffset: true
 preference:
   encode: 
-    useHardware: true
-    threads: 1
-    preset: superfast
-    profile: baseline
+    useHardware: false
+    threads: 4
+    preset: medium
+    profile: high
   decode:
     useHardware: true
-    threads: 1
-    count: 1
+    threads: 4
+    count: 3
   blender:
-    type: auto
+    type: cuda
 gyro:
-  version: 3 # Version from pro.prj file
+  version: 3
   type: pro 
   enable: true
   filter: akf
-# Add timeOffset tag, based on start_ts from pro.pj XML file
-# Add files tag, w/ path to desired gyro.dat file in our image folder
 color:
   brightness: 0
   contrast: 0
@@ -42,13 +40,13 @@ color:
   tint: 0
   sharpness: 0 
 output:
-  width: 7680 
-  height: 3840 
+  width: 6400 
+  height: 6400 
   type: video
 video:
   fps: 29.97
   codec: h264
-  # TODO(ryan): This should be calculated?
+  bitrate: 351624584.5845846
   useInterpolation: false
 audio:
   type: pano

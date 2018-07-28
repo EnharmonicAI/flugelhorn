@@ -112,7 +112,7 @@ def _get_video_grp_metadata(mp4_file):
 
 
 if __name__ == '__main__':
-    test_path = '/Users/ryan/Projects/flugelhorn/test.yaml' 
+    test_path = '/Users/ryan/Projects/flugelhorn/settings/daily_mono.yaml' 
     # config = load_configuration_from_yaml(test_path)
     
     # stitch source
