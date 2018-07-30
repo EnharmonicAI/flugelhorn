@@ -10,6 +10,7 @@ import os
 import imageio
 
 from flugelhorn.xml_utils import parse_proj_xml
+from flugelhorn.yaml_utils import load_configuration_from_yaml
 
 
 # Ensure ffmpeg exists
@@ -22,34 +23,26 @@ imageio.plugins.ffmpeg.download()
 StitchSource = namedtuple('StitchSource', 'media proj gyro')
 
 
-def build_stitching_config(config, stitch_source, stitched_dest):
-    """Build stitching configuration.
+def create_stitching_config_from_raw(raw_video_dir, stitched_dir):
+    """Create a complete stitching configuration from a raw video directory.
 
-    Read a starting configuration from a YAML file,
-    and add in specific file names and destinations."""
-
-    print(config)
-
-    # Define stitched file path
-    # TODO(ryan): Currently only supports single mp4 file output
-    stitched_path = '{0}.{1}'.format(stitched_dest, 'mp4')
-    config.output.dst = stitched_path
-
-
-    proj_dict = parse_proj_xml(stitch_source.proj)
-
-    # TODO(ryan): Add capture time and captureTimeIndex to blend.configuration
-
-    # Add gyro configuration
-    config.gyro.version = int(proj_dict['gyro_version'])
-    config.gyro.timeOffset = proj_dict['timeOffset']
-    config.gyro.filename = stitch_source.gyro
-
-    config.gyro_calibration.gravity_x = proj_dict['gravity_x']
-    config.gyro_calibration.gravity_y = proj_dict['gravity_y']
-    config.gyro_calibration.gravity_z = proj_dict['gravity_z']
-
-    return config
+    Args:
+        raw_video_dir: directory path containing raw video (.mp4) files,
+                       pro.prj file, and gyro.dat file
+        stitched_dir: directory path to output stitched video (.mp4) file
+    Returns:
+        final_config: final configuration object ready to be written to XML and
+                used for stitching 
+    """
+    base_filename = os.path.split(raw_video_dir)[1]
+    stitched_path = os.path.join(stitched_dir, base_filename)
+    print(stitched_path)
+    stitch_source = build_stitching_source(raw_video_dir)
+    print(stitch_source)
+    config = load_configuration_from_yaml(settings_yaml) 
+    final_config = build_stitching_config(config, stitch_source, stitched_path)
+     
+    return final_config
 
 
 def build_stitching_source(path):
@@ -92,6 +85,36 @@ def build_stitching_source(path):
     gyro = os.path.join(path, 'gyro.dat')
 
     return StitchSource(video_groups, proj, gyro)
+
+
+def build_stitching_config(config, stitch_source, stitched_dest):
+    """Build stitching configuration.
+
+    Read a starting configuration from a YAML file,
+    and add in specific file names and destinations."""
+
+    print(config)
+
+    # Define stitched file path
+    # TODO(ryan): Currently only supports single mp4 file output
+    stitched_path = '{0}.{1}'.format(stitched_dest, 'mp4')
+    config.output.dst = stitched_path
+
+
+    proj_dict = parse_proj_xml(stitch_source.proj)
+
+    # TODO(ryan): Add capture time and captureTimeIndex to blend.configuration
+
+    # Add gyro configuration
+    config.gyro.version = int(proj_dict['gyro_version'])
+    config.gyro.timeOffset = proj_dict['timeOffset']
+    config.gyro.filename = stitch_source.gyro
+
+    config.gyro_calibration.gravity_x = proj_dict['gravity_x']
+    config.gyro_calibration.gravity_y = proj_dict['gravity_y']
+    config.gyro_calibration.gravity_z = proj_dict['gravity_z']
+
+    return config
 
 
 def _get_video_grp_metadata(mp4_file):

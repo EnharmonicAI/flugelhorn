@@ -6,7 +6,23 @@ from __future__ import print_function
 
 from ruamel.yaml import YAML
 
-from stitcher_preferences import build_config_template, initialize_settings
+from flugelhorn.stitcher_settings import build_config_template, initialize_settings
+
+
+def load_configuration_from_yaml(yaml_path):
+    """Load Stitcher configuration from yaml file.
+
+    Args:
+        yaml_path: path to settings.yaml file
+    Returns:
+        config: a Settings object to be used for Stitcher run
+                Note that config will still need to have final
+                settings set based on media files and pro.prj file
+    """
+    yaml_dict = _load_yaml_to_dict(yaml_path)
+    config = _parse_yaml_dict(yaml_dict)
+
+    return config
 
 
 def _load_yaml_to_dict(path):
@@ -46,19 +62,3 @@ def _config_from_dict(config, settings_dict):
         # print(key, isinstance(value, dict))
             setattr(config, key, value)
     print(config)
-
-
-def load_configuration_from_yaml(yaml_path):
-    """Load Stitcher configuration from yaml file.
-
-    Args:
-        yaml_path: path to settings.yaml file
-    Returns:
-        config: a Settings object to be used for Stitcher run
-                Note that config will still need to have final
-                settings set based on media files and pro.prj file
-    """
-    yaml_dict = _load_yaml_to_dict(yaml_path)
-    config = _parse_yaml_dict(yaml_dict)
-
-    return config

@@ -1,8 +1,15 @@
-"""Stitcher preferences module
+"""Stitcher settings module
 
 Defines Settings base class, and factory to dynamically create all
 required Settings subclasses.
+
+This is done dynamically to simplify updates to allowed and default
+settings, while minimizing the boilerplate code to define new settings. 
 """
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 from setting_definitions import SETTING_DEFINITIONS
 
