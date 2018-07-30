@@ -11,7 +11,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from setting_definitions import SETTING_DEFINITIONS
+from flugelhorn.setting_definitions import SETTING_DEFINITIONS
 
 
 class PropertyDescriptor:

@@ -1,4 +1,10 @@
-"""Simple 360 Video Processing Automation."""
+#!/usr/bin/env python
+"""
+Stitch raw files and output a single video file (.mp4) to a stitched directory.
+Define settings for the stitching with a **settings** YAML fill.
+This automation skips any file copying, and will stitch the raw files
+from their current location.
+"""
 
 from __future__ import absolute_import
 from __future__ import division

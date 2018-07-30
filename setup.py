@@ -18,6 +18,7 @@ setup(
     py_modules=[os.path.splitext(os.path.basename(path))[0] for path in glob('src/*.py')],
     include_packagge_data=True,
     zip_safe=False,
+    scripts=['scripts/copy-and-stitch', 'scripts/stitch'],
     classifiers=[
         'Operating System :: Unix',
         'Operating System :: POSIX',

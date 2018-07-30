@@ -12,7 +12,7 @@ This automations package is built around insta360 Pro stitching workflows, so it
 
 ### Dependencies
 * insta360Stitcher software
-* Python 3 (Recommend the Anaconda distribution w/ conda.  Get it [here]())
+* Python 3
 
 If you don't already have it, he Anaconda distribution with **conda** environment manager is highly recommended
 Get it [here](https://www.anaconda.com/download/).
@@ -28,32 +28,44 @@ pip install .
 Copy directories from a **source** SD card to a media drive, stitch the **raw** files, and output a single video file (.mp4) to a **stitched** directory. Define settings for the stitching with a **settings** YAML file
 
 #### Mac OSX example
+
 ```
 copy-and-stitch \
-  --source=/Volumes/SD-Video2 \
-  --raw=/Users/me/Projects/NewFilm/raw \
-  --stitched=/Users/me/Projects/NewFilm/stitched \
-  --settings=
+  --source=/Users/ryan/Projects/test_videos/new_source \
+  --raw=/Users/ryan/Projects/test_videos/raw \
+  --stitched=/Users/ryan/Projects/test_videos/stitched \
+  --settings=/Users/ryan/Projects/flugelhorn/settings/daily_mono.yaml
 ```
+
 
 #### Windows example
 From bash (Git bash or cygwin)
 ```
-python copy_and_stitch.py \
+copy-and-stitch \
   --source=/f/test \
   --raw=/c/Users/ryan/Documents/VideoRaw \
   --stitched=/c/Users/ryan/Documents/VideoStitched \
   --settings=/c/Users/ryan/Projects/flugelhorn/settings/daily_mono.yaml
 ```
 
-From Powershell
-```
-python copy-and-stitch.py \
-  --source=F:\test \
-  --raw=C:\Users\ryan\Documents\VideoRaw \
-  --stitched=C:\Users\ryan\Documents\VideoStitched \
-  --settings=C:\Users\ryan\Projects\flugelhorn\settings\daily_mono.yaml
-```
 
 ### Stitch
 Stitch **raw** files and output a single video file (.mp4) to a **stitched** directory. Define settings for the stitching with a **settings** YAML fill. This automation skips any file copying, and will stitch the raw files from their current location.
+
+#### Mac OSX example
+```
+stitch \
+  --raw=/Users/ryan/Projects/test_videos/raw \
+  --stitched=/Users/ryan/Projects/test_videos/stitched \
+  --settings=/Users/ryan/Projects/flugelhorn/settings/daily_mono.yaml
+```
+
+#### Windows example
+From bash (Git bash or cygwin)
+```
+stitch \
+  --source=/f/test \
+  --raw=/c/Users/ryan/Documents/VideoRaw \
+  --stitched=/c/Users/ryan/Documents/VideoStitched \
+  --settings=/c/Users/ryan/Projects/flugelhorn/settings/daily_mono.yaml
+```

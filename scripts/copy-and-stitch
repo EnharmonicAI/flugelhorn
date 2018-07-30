@@ -1,4 +1,10 @@
-"""Simple 360 Video Processing Automation."""
+#!/usr/bin/env python
+"""
+Copy directories from a source SD card to a media drive,
+stitch the raw files, and output a single video file (.mp4)
+to a stitched directory.
+Define settings for the stitching with a settings YAML file
+"""
 
 from __future__ import absolute_import
 from __future__ import division
