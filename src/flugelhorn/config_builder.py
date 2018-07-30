@@ -9,7 +9,7 @@ import os
 
 import imageio
 
-from flugelhorn.xml_utils import parse_proj_xml
+from flugelhorn.xml_utils import parse_proj_xml, write_config_xml
 from flugelhorn.yaml_utils import load_configuration_from_yaml
 
 
@@ -23,15 +23,16 @@ imageio.plugins.ffmpeg.download()
 StitchSource = namedtuple('StitchSource', 'media proj gyro')
 
 
-def create_stitching_config_from_raw(raw_video_dir, stitched_dir):
+def create_and_write_stitching_config_from_raw(raw_video_dir, stitched_dir, settings_yaml):
     """Create a complete stitching configuration from a raw video directory.
 
+    Creates a stitching config and writes to an xml file 
     Args:
         raw_video_dir: directory path containing raw video (.mp4) files,
                        pro.prj file, and gyro.dat file
         stitched_dir: directory path to output stitched video (.mp4) file
     Returns:
-        final_config: final configuration object ready to be written to XML and
+        xml_path: path to XML used for stitching
                 used for stitching 
     """
     base_filename = os.path.split(raw_video_dir)[1]
@@ -41,8 +42,12 @@ def create_stitching_config_from_raw(raw_video_dir, stitched_dir):
     print(stitch_source)
     config = load_configuration_from_yaml(settings_yaml) 
     final_config = build_stitching_config(config, stitch_source, stitched_path)
-     
-    return final_config
+
+    # Write XML for stitching
+    xml_save_path = '{0}.xml'.format(stitched_path)
+    write_config_xml(config, stitch_source, xml_save_path)
+ 
+    return xml_save_path 
 
 
 def build_stitching_source(path):

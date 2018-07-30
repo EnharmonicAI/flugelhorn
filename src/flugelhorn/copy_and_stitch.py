@@ -11,7 +11,7 @@ import subprocess
 from absl import app
 from absl import flags
 
-from flugelhorn.file_ops import check_paths
+from flugelhorn.file_ops import find_video_image_dirs, copy_source_to_raw_dirs, check_paths
 from flugelhorn.stitching import stitch_from_raw
 
 
@@ -55,10 +55,16 @@ def run_copy(source_dir, raw_dir):
     source_video_dirs, source_image_dirs = find_video_image_dirs(source_dir)
 
     print('Copying video directories.')
-    raw_video_paths = copy_source_to_raw_dirs(source_video_dirs, raw_dir) 
+    if source_video_dirs:
+        raw_video_paths = copy_source_to_raw_dirs(source_video_dirs, raw_dir) 
+    else:
+        raw_video_paths = []
 
     print('Copying image directories.')
-    raw_image_paths = copy_source_to_raw_dirs(source_image_dirs, raw_dir) 
+    if source_image_dirs:
+        raw_image_paths = copy_source_to_raw_dirs(source_image_dirs, raw_dir) 
+    else:
+        raw_image_paths = []
 
     print('Copying complete')
     
@@ -79,7 +85,7 @@ def main(argv):
     raw_dir = os.path.abspath(FLAGS.raw)
     stitched_dir = os.path.abspath(FLAGS.stitched)
     # Ensure directories exist
-    for directory in [raw_dir, stitched_dir]
+    for directory in [raw_dir, stitched_dir]:
         os.makedirs(directory, exist_ok=True)
     settings_path = os.path.abspath(FLAGS.settings)
 
@@ -93,8 +99,8 @@ def main(argv):
     raw_video_paths, raw_image_dirs = run_copy(source_dir, raw_dir)
     
     # For testing...
-    raw_video_paths = ['/Users/ryan/Projects/test_videos/raw/VID_2018_07_13_00_32_26',
-                       '/Users/ryan/Projects/test_videos/raw/VID_2018_07_13_00_04_31']
+    # raw_video_paths = ['/Users/ryan/Projects/test_videos/raw/VID_2018_07_13_00_32_26',
+    #                   '/Users/ryan/Projects/test_videos/raw/VID_2018_07_13_00_04_31']
 
     print('------Beginning Stitching-------')
     for path in raw_video_paths:

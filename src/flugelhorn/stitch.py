@@ -9,7 +9,7 @@ import os
 from absl import app
 from absl import flags
 
-from flugelhorn.file_ops import check_paths
+from flugelhorn.file_ops import find_video_image_dirs, check_paths
 from flugelhorn.stitching import stitch_from_raw
 
 
@@ -48,13 +48,15 @@ def main(argv):
     except NotADirectoryError as e:
         print(e) 
 
-    # For testing...
-    raw_video_paths = ['/Users/ryan/Projects/test_videos/raw/VID_2018_07_13_00_32_26',
-                       '/Users/ryan/Projects/test_videos/raw/VID_2018_07_13_00_04_31']
+    # Find raw video paths
+    print('Searching raw path for files to be stitched: {0}'.format(raw_dir))
+    raw_video_paths, raw_image_paths = find_video_image_dirs(raw_dir)
+
+    print(raw_video_paths)
 
     print('------Beginning Stitching-------')
     for path in raw_video_paths:
-        stitch_from_raw(path, source_dir, settings_path)
+        stitch_from_raw(path, stitched_dir, settings_path)
 
 
 if __name__ == '__main__':

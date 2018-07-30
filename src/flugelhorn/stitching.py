@@ -6,13 +6,13 @@ from __future__ import print_function
 
 import os
 import platform
+import subprocess
 
-from flugelhorn.config_builder import create_stitching_config_from_raw
-from flugelhorn.xml_utils import write_config_xml
+from flugelhorn.config_builder import create_and_write_stitching_config_from_raw
 
 
 OSX_STITCHER_APP = '/Applications/Insta360Stitcher.app/Contents/Resources/tools/ProStitcher/ProStitcher'
-WINDOWS_STITCHER_APP = ''
+WINDOWS_STITCHER_APP = 'C:\\Program Files (x86)\\Insta360Stitcher\\tools\\prostitcher\\proStitcher.exe'
 
 
 class StitcherInstallError(Exception):
@@ -37,14 +37,15 @@ def stitch_from_raw(raw_video_dir, stitched_dir, settings_yaml):
     Returns:
         None
     """ 
-    config = create_stitching_config_from_raw(raw_video_dir, stitched_dir)
+    xml_save_path = create_and_write_stitching_config_from_raw(raw_video_dir, stitched_dir, settings_yaml)
         
     # Write XML for stitching
-    xml_save_path = '{0}.xml'.format(stitched_path)
-    write_config_xml(config, stitch_source, xml_save_path)
+    # stitched_path = os.path.join(stitched_dir, os.path.split(raw_video_dir)[1])
+    # xml_save_path = '{0}.xml'.format(stitched_path)
+    # write_config_xml(config, stitch_source, xml_save_path)
 
     # Run stitching
-    log_path = '{0}.log'.format(stitched_path)
+    log_path = '{0}.log'.format(os.path.join(stitched_dir, os.path.split(raw_video_dir)[1]))
     run_stitching_app(xml_save_path, log_path)
 
 
@@ -54,7 +55,7 @@ def run_stitching_app(xml_path, log_path):
     This currently supports the Insta360 ProStitcher app only.
     """
     stitching_app = get_stitching_app_path()
-    subprocess.run([stitching_app, 'l', log_path, '-x', xml_path])
+    subprocess.run([stitching_app, '-l', log_path, '-x', xml_path, '-w', 'stitch'])
 
 
 def get_stitching_app_path():

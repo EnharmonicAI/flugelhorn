@@ -36,9 +36,9 @@ def _convert_to_str(value):
 
     This ensure proper XML build.
     """
-    if isinstance(value) in [int, float]:
+    if type(value) in [int, float]:
         return str(value)
-    elif isinstance(value) == bool:
+    elif type(value) == bool:
         return str(int(value))
     return value
 

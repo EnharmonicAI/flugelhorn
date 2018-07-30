@@ -16,7 +16,7 @@ def find_video_image_dirs(path):
             # todo(ryan): divide by video and images
             # print(entry.path)
             # print(entry.name)
-            source_video_dirs.append((entry.path, entry.name)) 
+            source_video_dirs.append(entry.path)
     
     print('{0} video directories, {1} images directories found.'.format(
         len(source_video_dirs), len(source_image_dirs)))
@@ -27,9 +27,10 @@ def find_video_image_dirs(path):
 def copy_source_to_raw_dirs(source_dirs, dest_base):
     dest_paths = []
     for d in source_dirs:
-        dest_path = os.path.join(dest_base, d[1])
-        print('Copying {0} to {1}.'.format(d[0], dest_path))
-        shutil.copytree(d[0], dest_path) 
+        folder_name = os.path.split(d)[1]
+        dest_path = os.path.join(dest_base, folder_name) 
+        print('Copying {0} to {1}.'.format(d, dest_path))
+        shutil.copytree(d, dest_path) 
         dest_paths.append(dest_path)
         
     return dest_paths
