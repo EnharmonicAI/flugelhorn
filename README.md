@@ -64,7 +64,6 @@ stitch \
 From bash (Git bash or cygwin)
 ```
 stitch \
-  --source=/f/test \
   --raw=/c/Users/ryan/Documents/VideoRaw \
   --stitched=/c/Users/ryan/Documents/VideoStitched \
   --settings=/c/Users/ryan/Projects/flugelhorn/settings/daily_mono.yaml
