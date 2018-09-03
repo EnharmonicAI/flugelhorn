@@ -65,13 +65,16 @@ def main(argv):
 
     print(found_video_paths)
     # Define ranges up to greater second)
-    video_ranges = [VideoRange('VID_2018_09_02_10_48_53', 40, 47)]#,
-                    VideoRange('VID_2018_09_02_11_04_44', 3, 8),
-                    VideoRange('VID_2018_09_02_11_05_41', 1, 8),
-                    VideoRange('VID_2018_09_02_11_06_14', 0, 6),
-                    VideoRange('VID_2018_09_02_11_06_14', 19, 24),
-                    VideoRange('VID_2018_09_02_11_07_37', 3, 6),
-                    VideoRange('VID_2018_09_02_11_08_37', 21, 24),
+    #video_ranges = # [VideoRange('VID_2018_09_02_10_48_53', 40, 47)
+    # VideoRange('VID_2018_09_02_11_04_44', 3, 8),]#,
+    # VideoRange('VID_2018_09_02_11_05_41', 1, 8),
+    # I may have overwritten one of these...
+    # VideoRange('VID_2018_09_02_11_06_14', 0, 6),
+    # VideoRange('VID_2018_09_02_11_06_14', 19, 24),
+    # VideoRange('VID_2018_09_02_11_07_37', 3, 6),
+    # VideoRange('VID_2018_09_02_11_08_37', 21, 24),
+    # VideoRange('VID_2018_09_02_11_34_36', 0, 24.5),
+    video_ranges = [
                     VideoRange('VID_2018_09_02_11_09_45', 1, 5),
                     VideoRange('VID_2018_09_02_11_10_58', 6, 8),
                     VideoRange('VID_2018_09_02_11_13_59', 8, 12),
@@ -82,7 +85,6 @@ def main(argv):
                     VideoRange('VID_2018_09_02_11_23_53', 2, 30),
                     VideoRange('VID_2018_09_02_11_30_01', 4, 22.3),
                     VideoRange('VID_2018_09_02_11_31_59', 10.8, 17),
-                    VideoRange('VID_2018_09_02_11_34_36', 0, 24.5),
                     VideoRange('VID_2018_09_02_11_35_36', 1.5, 12.5),
                     VideoRange('VID_2018_09_02_11_36_57', 3.3, 27),
                     VideoRange('VID_2018_09_02_11_38_04', 0, 7.5),
@@ -104,22 +106,19 @@ def main(argv):
                     VideoRange('VID_2018_09_02_12_44_42', 4.8, 7.5)]
 
     print('------Beginning Stitching-------'),
-
-
     for vid_range in video_ranges:
         print(vid_range)
         # Only stitch paths that are found
         vid_path = os.path.join(raw_dir, vid_range.raw_video_path)
         if vid_path in found_video_paths:
-            print(vid_path)
+            # print(vid_path)
+            print('Stitching {0} for range {1:0.3f} : {2:0.3f}'.format(
+                vid_path, vid_range.start, vid_range.end))
+            stitch_from_raw(vid_path, stitched_dir, settings_path, vid_range.start, vid_range.end)
+
         else:
             print('Path {0} not found in supplied directory'.format(
                 vid_range.raw_video_path))
-
-        print('Stitching {0} for range {1:0.3f} : {2:0.3f}'.format(
-            vid_path, vid_range.start, vid_range.end))
-
-        stitch_from_raw(vid_path, stitched_dir, settings_path, vid_range.start, vid_range.end)
 
 
 if __name__ == '__main__':
