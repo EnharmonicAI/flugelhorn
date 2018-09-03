@@ -144,7 +144,7 @@ def build_video_groups(stitch_source):
     """
     video_groups = []
     for group in stitch_source.media:
-        print(group)
+        # print(group)
         video_group_attrib = {
             'ptsOffset': '%0.3f' % group['ptsOffset'],
             'enable': '1'}

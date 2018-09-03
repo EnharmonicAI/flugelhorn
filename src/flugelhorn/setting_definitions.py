@@ -12,7 +12,7 @@ SETTING_DEFINITIONS= {
         'type': PropertyDef(['image', 'video'], 'video'),
         'lensCount': PropertyDef([6], 6),
         'fileCount': PropertyDef(None, 1)
-    }, 
+    },
     'blend': {
         'useOpticalFlow': PropertyDef([True, False], True),
         'useNewOpticalFlow': PropertyDef([True, False], True),
@@ -82,7 +82,7 @@ SETTING_DEFINITIONS= {
     },
     'output': {
         'width': PropertyDef([2560, 3840, 5120, 6400, 7680], 3840),
-        'height': PropertyDef([1280, 1920, 2560, 3200, 3840], 1920),
+        'height': PropertyDef([1280, 1920, 2560, 3200, 3840, 6400], 1920),
         'dst': PropertyDef(None, None),
         'type': PropertyDef(['video'], 'video')
     },
@@ -91,12 +91,10 @@ SETTING_DEFINITIONS= {
         'codec': PropertyDef(['h264', 'h265'], 'h264'),
         # TODO(ryan): This should be calculated?
         'bitrate': PropertyDef(None, 62914560),
-        'useInterpolation': PropertyDef([True, False], False) 
+        'useInterpolation': PropertyDef([True, False], False)
     },
     'audio': {
         'type': PropertyDef(['pano', 'normal', 'none'], 'pano'),
         'device': PropertyDef(['insta360', ''], 'insta360')
     }
 }
-
-

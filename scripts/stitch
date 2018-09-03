@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Stitch raw files and output a single video file (.mp4) to a stitched directory.
-Define settings for the stitching with a **settings** YAML fill.
+Define settings for the stitching with a **settings** YAML file.
 This automation skips any file copying, and will stitch the raw files
 from their current location.
 """
@@ -52,7 +52,7 @@ def main(argv):
     try:
         check_paths([raw_dir, stitched_dir])
     except NotADirectoryError as e:
-        print(e) 
+        print(e)
 
     # Find raw video paths
     print('Searching raw path for files to be stitched: {0}'.format(raw_dir))
@@ -66,4 +66,4 @@ def main(argv):
 
 
 if __name__ == '__main__':
-    app.run(main) 
+    app.run(main)

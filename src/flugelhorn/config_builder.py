@@ -23,35 +23,44 @@ imageio.plugins.ffmpeg.download()
 StitchSource = namedtuple('StitchSource', 'media proj gyro')
 
 
-def create_and_write_stitching_config_from_raw(raw_video_dir, stitched_dir, settings_yaml):
+def create_and_write_stitching_config_from_raw(raw_video_dir, stitched_dir, settings_yaml, start=None, end=None):
     """Create a complete stitching configuration from a raw video directory.
 
-    Creates a stitching config and writes to an xml file 
+    Creates a stitching config and writes to an xml file
     Args:
         raw_video_dir: directory path containing raw video (.mp4) files,
                        pro.prj file, and gyro.dat file
         stitched_dir: directory path to output stitched video (.mp4) file
+        settings_yaml:
+        start:
+        end:
     Returns:
         xml_path: path to XML used for stitching
-                used for stitching 
+                used for stitching
     """
     base_filename = os.path.split(raw_video_dir)[1]
     stitched_path = os.path.join(stitched_dir, base_filename)
-    print(stitched_path)
-    stitch_source = build_stitching_source(raw_video_dir)
-    print(stitch_source)
-    config = load_configuration_from_yaml(settings_yaml) 
+    # print(stitched_path)
+    stitch_source = build_stitching_source(raw_video_dir, start, end)
+    # print(stitch_source)
+    config = load_configuration_from_yaml(settings_yaml)
     final_config = build_stitching_config(config, stitch_source, stitched_path)
 
     # Write XML for stitching
     xml_save_path = '{0}.xml'.format(stitched_path)
-    write_config_xml(config, stitch_source, xml_save_path)
- 
-    return xml_save_path 
+    write_config_xml(final_config, stitch_source, xml_save_path)
+
+    return xml_save_path
 
 
-def build_stitching_source(path):
-    """Build a list of StitchSource objects from a list of paths."""
+def build_stitching_source(path, start=None, end=None):
+    """Build a list of StitchSource objects from a list of paths.
+
+    Args:
+        path:
+        start:
+        end:
+    """
     media = []
     for filename in os.listdir(path):
         if os.path.splitext(filename)[1] == '.mp4':
@@ -75,8 +84,16 @@ def build_stitching_source(path):
             media.remove(filename)
 
         metadata = _get_video_grp_metadata(vid_group[0])
-        vid_group['start'] = metadata['start']
-        vid_group['end'] = metadata['end']
+        if start is None:
+            vid_group['start'] = metadata['start']
+        else:
+            vid_group['start'] = start
+
+        if end is None:
+            vid_group['end'] = metadata['end']
+        else:
+            vid_group['end'] = min(end, metadata['end'])
+
         # Use the previous group's end time as the offset
         if n == 0:
             vid_group['ptsOffset'] = 0
@@ -84,7 +101,7 @@ def build_stitching_source(path):
             vid_group['ptsOffset'] = video_groups[-1]['end']
         video_groups.append(vid_group)
     assert len(media) <= 1
-    print(video_groups)
+    # print(video_groups)
 
     proj = os.path.join(path, 'pro.prj')
     gyro = os.path.join(path, 'gyro.dat')
@@ -96,9 +113,9 @@ def build_stitching_config(config, stitch_source, stitched_dest):
     """Build stitching configuration.
 
     Read a starting configuration from a YAML file,
-    and add in specific file names and destinations."""
-
-    print(config)
+    and add in specific file names and destinations.
+    """
+    # print(config)
 
     # Define stitched file path
     # TODO(ryan): Currently only supports single mp4 file output

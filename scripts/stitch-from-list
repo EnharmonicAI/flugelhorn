@@ -1,0 +1,126 @@
+#!/usr/bin/env python
+"""
+Stitch raw files and output a single video file (.mp4) to a stitched directory.
+Define settings for the stitching with a **settings** YAML fill.
+This automation will stitch pre-selected raw files
+in their included start and end ranges
+"""
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+from collections import namedtuple
+import os
+
+from absl import app
+from absl import flags
+
+from flugelhorn.file_ops import find_video_image_dirs, check_paths
+from flugelhorn.stitching import stitch_from_raw
+
+
+flags.DEFINE_string(
+    'raw', None,
+    'Destination path for files to be copied.'
+    'This will probably be a local HDD or SSD.')
+flags.DEFINE_string(
+    'stitched', None,
+    'Base path for stitched files.')
+flags.DEFINE_string(
+    'settings', None,
+    'Path to a yaml file defining your stitching and encoding settings.'
+    'This can be one of the Flugelhorn-included yaml files or a custom user'
+    'defined settings file.')
+
+FLAGS = flags.FLAGS
+
+
+VideoRange = namedtuple('VideoRange', ['raw_video_path', 'start', 'end'])
+
+def main(argv):
+    if not FLAGS.raw:
+        print('Error: Raw destination path must be supplied (--raw).')
+        return
+    if not FLAGS.stitched:
+        print('Error: Stitched path must be supplied (--stitched).')
+        return
+    raw_dir = os.path.abspath(FLAGS.raw)
+    stitched_dir = os.path.abspath(FLAGS.stitched)
+    # Ensure directories exist
+    os.makedirs(stitched_dir, exist_ok=True)
+    settings_path = os.path.abspath(FLAGS.settings)
+
+    # Check that all paths are directories
+    try:
+        check_paths([raw_dir, stitched_dir])
+    except NotADirectoryError as e:
+        print(e)
+
+    # Read user-defined video paths, start and end points.
+    # Match user-defined paths against found files.
+    # Find raw video paths
+    print('Searching raw path for files to be stitched: {0}'.format(raw_dir))
+    found_video_paths, raw_image_paths = find_video_image_dirs(raw_dir)
+
+    print(found_video_paths)
+    # Define ranges up to greater second)
+    video_ranges = [VideoRange('VID_2018_09_02_10_48_53', 40, 47)]#,
+                    VideoRange('VID_2018_09_02_11_04_44', 3, 8),
+                    VideoRange('VID_2018_09_02_11_05_41', 1, 8),
+                    VideoRange('VID_2018_09_02_11_06_14', 0, 6),
+                    VideoRange('VID_2018_09_02_11_06_14', 19, 24),
+                    VideoRange('VID_2018_09_02_11_07_37', 3, 6),
+                    VideoRange('VID_2018_09_02_11_08_37', 21, 24),
+                    VideoRange('VID_2018_09_02_11_09_45', 1, 5),
+                    VideoRange('VID_2018_09_02_11_10_58', 6, 8),
+                    VideoRange('VID_2018_09_02_11_13_59', 8, 12),
+                    VideoRange('VID_2018_09_02_11_15_07', 37, 40.5),
+                    VideoRange('VID_2018_09_02_11_15_07', 49, 51.2),
+                    VideoRange('VID_2018_09_02_11_22_53', 0, 2),
+                    VideoRange('VID_2018_09_02_11_22_53', 14.5, 17.7),
+                    VideoRange('VID_2018_09_02_11_23_53', 2, 30),
+                    VideoRange('VID_2018_09_02_11_30_01', 4, 22.3),
+                    VideoRange('VID_2018_09_02_11_31_59', 10.8, 17),
+                    VideoRange('VID_2018_09_02_11_34_36', 0, 24.5),
+                    VideoRange('VID_2018_09_02_11_35_36', 1.5, 12.5),
+                    VideoRange('VID_2018_09_02_11_36_57', 3.3, 27),
+                    VideoRange('VID_2018_09_02_11_38_04', 0, 7.5),
+                    VideoRange('VID_2018_09_02_12_13_37', 5.2, 13.3),
+                    VideoRange('VID_2018_09_02_12_16_16', 10.7, 32.5),
+                    VideoRange('VID_2018_09_02_12_26_44', 3.4, 30.5),
+                    VideoRange('VID_2018_09_02_12_29_00', 17, 28),
+                    VideoRange('VID_2018_09_02_12_29_58', 3.5, 6.5),
+                    VideoRange('VID_2018_09_02_12_29_58', 12.5, 18.5),
+                    VideoRange('VID_2018_09_02_12_29_58', 19.8, 26),
+                    VideoRange('VID_2018_09_02_12_30_55', 13, 19.3),
+                    VideoRange('VID_2018_09_02_12_31_35', 13, 35),
+                    VideoRange('VID_2018_09_02_12_32_53', 15.5, 23.6),
+                    VideoRange('VID_2018_09_02_12_37_29', 10.6, 13.1),
+                    VideoRange('VID_2018_09_02_12_38_23', 21.4, 27.1),
+                    VideoRange('VID_2018_09_02_12_42_00', 5, 13),
+                    VideoRange('VID_2018_09_02_12_43_06', 29.8, 33.5),
+                    VideoRange('VID_2018_09_02_12_44_09', 6.4, 9),
+                    VideoRange('VID_2018_09_02_12_44_42', 4.8, 7.5)]
+
+    print('------Beginning Stitching-------'),
+
+
+    for vid_range in video_ranges:
+        print(vid_range)
+        # Only stitch paths that are found
+        vid_path = os.path.join(raw_dir, vid_range.raw_video_path)
+        if vid_path in found_video_paths:
+            print(vid_path)
+        else:
+            print('Path {0} not found in supplied directory'.format(
+                vid_range.raw_video_path))
+
+        print('Stitching {0} for range {1:0.3f} : {2:0.3f}'.format(
+            vid_path, vid_range.start, vid_range.end))
+
+        stitch_from_raw(vid_path, stitched_dir, settings_path, vid_range.start, vid_range.end)
+
+
+if __name__ == '__main__':
+    app.run(main)

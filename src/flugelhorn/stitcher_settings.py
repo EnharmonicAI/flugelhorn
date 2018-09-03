@@ -4,7 +4,7 @@ Defines Settings base class, and factory to dynamically create all
 required Settings subclasses.
 
 This is done dynamically to simplify updates to allowed and default
-settings, while minimizing the boilerplate code to define new settings. 
+settings, while minimizing the boilerplate code to define new settings.
 """
 
 from __future__ import absolute_import
@@ -108,10 +108,10 @@ def setting_factory(setting_name, properties):
     prop_descriptors = {}
     nested = {}
     for prop, prop_def in properties.items():
-        print(prop, type(prop_def))
+        # print(prop, type(prop_def))
         if isinstance(prop_def, dict):
-            print("NESTED!!")
-            print(properties[prop])
+            # print("NESTED!!")
+            # print(properties[prop])
             # Nested properties have another Settings object as their value
             # They are not PropertyDescriptors
             # We create a new Settings class, and will create an instance later
@@ -145,7 +145,7 @@ def initialize_settings(setting_template):
     # Recursively initialize from top->down
     top_setting = setting_template()
     for n in top_setting._nested:
-        print(n)
+        # print(n)
         sub_setting = getattr(top_setting, n)
         initialized_setting = initialize_settings(sub_setting)
         setattr(top_setting, n, initialized_setting)
